@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Late Kitchen — Supper Delivery</title>
+<style>
+  :root {
+    --ink: #171b26;
+    --ink-deep: #0f1219;
+    --cream: #f3ede2;
+    --amber: #e3a458;
+    --amber-dim: #b57a3a;
+    --rust: #a85338;
+    --line: rgba(243,237,226,0.14);
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'Work Sans', -apple-system, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  @font-face {
+    font-family: 'Fraunces';
+    src: local('Georgia');
+  }
+
+  body {
+    background: var(--ink);
+    color: var(--cream);
+    font-family: var(--font-body);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+
+  img, svg { display: block; max-width: 100%; }
+
+  /* ---------- Header ---------- */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 5%;
+    background: rgba(15,18,25,0.86);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .brand {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    letter-spacing: 0.01em;
+  }
+  .brand span { color: var(--amber); }
+
+  nav ul {
+    list-style: none;
+    display: flex;
+    gap: 2rem;
+    font-size: 0.95rem;
+  }
+  nav a { text-decoration: none; opacity: 0.85; transition: opacity 0.2s; }
+  nav a:hover, nav a:focus-visible { opacity: 1; color: var(--amber); }
+
+  .cart-btn {
+    background: none;
+    border: 1px solid var(--line);
+    color: var(--cream);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    padding: 0.55rem 1.1rem;
+    border-radius: 3px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .cart-btn:hover, .cart-btn:focus-visible { border-color: var(--amber); color: var(--amber); }
+  #cart-count {
+    background: var(--rust);
+    color: var(--cream);
+    border-radius: 50%;
+    width: 1.3rem;
+    height: 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+  }
+
+  @media (max-width: 720px) {
+    nav { display: none; }
+  }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative;
+    min-height: 88vh;
+    display: flex;
+    align-items: flex-end;
+    padding: 0 5% 6rem;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 82% 18%, rgba(227,164,88,0.16), transparent 45%),
+      linear-gradient(180deg, var(--ink) 0%, var(--ink-deep) 100%);
+  }
+
+  .hero-stars {
+    position: absolute;
+    inset: 0;
+    opacity: 0.5;
+  }
+
+  .hero-content { position: relative; max-width: 640px; }
+
+  .hero-eyebrow {
+    font-size: 0.85rem;
+    color: var(--amber);
+    margin-bottom: 1.1rem;
+  }
+
+  .hero h1 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(2.4rem, 6vw, 4.4rem);
+    line-height: 1.04;
+    letter-spacing: -0.01em;
+  }
+
+  .hero p {
+    margin-top: 1.4rem;
+    font-size: 1.1rem;
+    max-width: 46ch;
+    color: rgba(243,237,226,0.78);
+  }
+
+  .hero-actions {
+    margin-top: 2.2rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 0.85rem 1.6rem;
+    border-radius: 3px;
+    font-size: 0.95rem;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid transparent;
+    font-family: var(--font-body);
+  }
+  .btn-primary { background: var(--amber); color: var(--ink-deep); font-weight: 600; }
+  .btn-primary:hover, .btn-primary:focus-visible { background: #edb56d; }
+  .btn-ghost { border-color: var(--line); color: var(--cream); background: transparent; }
+  .btn-ghost:hover, .btn-ghost:focus-visible { border-color: var(--amber); color: var(--amber); }
+
+  .hero-hours {
+    position: absolute;
+    right: 5%;
+    bottom: 6rem;
+    text-align: right;
+    font-size: 0.85rem;
+    color: rgba(243,237,226,0.6);
+  }
+  .hero-hours strong { display: block; color: var(--cream); font-size: 1.05rem; margin-bottom: 0.2rem; }
+
+  @media (max-width: 900px) {
+    .hero-hours { display: none; }
+  }
+
+  /* ---------- Section shell ---------- */
+  section { padding: 5.5rem 5%; }
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 2.6rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .section-head h2 {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+    font-weight: 600;
+  }
+  .section-head p { color: rgba(243,237,226,0.6); max-width: 40ch; font-size: 0.95rem; }
+
+  /* ---------- About strip ---------- */
+  .about {
+    background: var(--ink-deep);
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+  }
+  .about p { color: rgba(243,237,226,0.72); margin-top: 1rem; }
+  .about-figure {
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 2rem;
+    background: linear-gradient(160deg, rgba(227,164,88,0.08), transparent);
+  }
+  .about-figure .stat { font-family: var(--font-display); font-size: 2.4rem; color: var(--amber); }
+  .about-figure .stat-row { display: flex; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid var(--line); }
+  .about-figure .stat-row:last-child { border-bottom: none; }
+  .about-figure .stat-label { align-self: center; font-size: 0.85rem; color: rgba(243,237,226,0.6); max-width: 16ch; text-align: right; }
+
+  @media (max-width: 800px) {
+    .about { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Menu ---------- */
+  .menu-tabs {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  .menu-tab {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: rgba(243,237,226,0.7);
+    padding: 0.5rem 1.1rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-family: var(--font-body);
+  }
+  .menu-tab.active { border-color: var(--amber); color: var(--amber); }
+
+  .menu-list { display: flex; flex-direction: column; }
+  .menu-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 1.3rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .menu-item:first-child { border-top: 1px solid var(--line); }
+  .menu-item-name { font-family: var(--font-display); font-size: 1.15rem; }
+  .menu-item-desc {
+    grid-column: 2 / 3;
+    grid-row: 2;
+    font-size: 0.85rem;
+    color: rgba(243,237,226,0.55);
+    margin-top: -0.4rem;
+  }
+  .menu-item-leader {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    display: none;
+  }
+  .menu-item-price { font-family: var(--font-body); color: var(--amber); font-size: 1rem; white-space: nowrap; }
+  .add-btn {
+    background: none;
+    border: 1px solid var(--line);
+    color: var(--cream);
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+  .add-btn:hover, .add-btn:focus-visible { border-color: var(--amber); color: var(--amber); }
+
+  @media (max-width: 600px) {
+    .menu-item { grid-template-columns: 1fr auto auto; }
+    .menu-item-desc { grid-column: 1 / 2; }
+  }
+
+  /* ---------- Delivery info ---------- */
+  .info-grid {
+    background: var(--ink-deep);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+  .info-card {
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 1.8rem;
+  }
+  .info-card h3 { font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 0.6rem; }
+  .info-card p { font-size: 0.9rem; color: rgba(243,237,226,0.65); }
+
+  @media (max-width: 800px) {
+    .info-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Footer ---------- */
+  footer {
+    padding: 3rem 5% 2rem;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: rgba(243,237,226,0.5);
+  }
+
+  /* ---------- Cart drawer ---------- */
+  .cart-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15,18,25,0.6);
+    z-index: 90;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .cart-overlay.open { opacity: 1; pointer-events: auto; }
+
+  .cart-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: min(400px, 92vw);
+    background: var(--ink-deep);
+    border-left: 1px solid var(--line);
+    z-index: 100;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 1.6rem;
+  }
+  .cart-drawer.open { transform: translateX(0); }
+
+  .cart-drawer-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.6rem; }
+  .cart-drawer-head h3 { font-family: var(--font-display); font-size: 1.4rem; }
+  .close-cart { background: none; border: none; color: var(--cream); font-size: 1.4rem; cursor: pointer; }
+
+  .cart-items { flex: 1; overflow-y: auto; }
+  .cart-line { display: flex; justify-content: space-between; padding: 0.9rem 0; border-bottom: 1px solid var(--line); font-size: 0.92rem; }
+  .cart-line-name { display: flex; flex-direction: column; }
+  .cart-line-name small { color: rgba(243,237,226,0.5); font-size: 0.78rem; }
+  .cart-empty { color: rgba(243,237,226,0.5); font-size: 0.9rem; padding: 1rem 0; }
+
+  .cart-total { display: flex; justify-content: space-between; padding: 1.2rem 0; font-family: var(--font-display); font-size: 1.2rem; border-top: 1px solid var(--line); margin-top: 0.5rem; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">Late<span>Kitchen</span></div>
+  <nav>
+    <ul>
+      <li><a href="#menu">Menu</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#delivery">Delivery</a></li>
+    </ul>
+  </nav>
+  <button class="cart-btn" id="open-cart" aria-label="Open cart">
+    Cart <span id="cart-count">0</span>
+  </button>
+</header>
+
+<section class="hero">
+  <svg class="hero-stars" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+    <circle cx="12" cy="15" r="0.4" fill="#f3ede2"/>
+    <circle cx="30" cy="8" r="0.3" fill="#f3ede2"/>
+    <circle cx="55" cy="20" r="0.5" fill="#e3a458"/>
+    <circle cx="70" cy="5" r="0.3" fill="#f3ede2"/>
+    <circle cx="88" cy="25" r="0.4" fill="#f3ede2"/>
+    <circle cx="45" cy="12" r="0.3" fill="#f3ede2"/>
+    <circle cx="20" cy="30" r="0.3" fill="#f3ede2"/>
+    <circle cx="95" cy="14" r="0.3" fill="#e3a458"/>
+  </svg>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Delivering 9pm — 3am, nightly</div>
+    <h1>Dinner's over. Supper's just starting.</h1>
+    <p>Porridge, soup noodles, and late-night plates cooked to order and delivered while the rest of the city winds down.</p>
+    <div class="hero-actions">
+      <a href="#menu" class="btn btn-primary">See tonight's menu</a>
+      <a href="#delivery" class="btn btn-ghost">Delivery areas</a>
+    </div>
+  </div>
+  <div class="hero-hours">
+    <strong>Open now</strong>
+    Last order 2:30am
+  </div>
+</section>
+
+<section class="about" id="about">
+  <div>
+    <div class="hero-eyebrow">Our story</div>
+    <h2 style="font-family:var(--font-display); font-size:clamp(1.8rem,3vw,2.4rem);">Started for the night-shift crowd</h2>
+    <p>We began cooking for nurses, drivers, and call-centre teams coming off shift with nowhere to eat. Every dish on the menu is built to travel well and land hot — the kind of food you want at 1am, not 1pm.</p>
+    <p>No frozen shortcuts. Broths are started fresh each evening and portioned to order.</p>
+  </div>
+  <div class="about-figure">
+    <div class="stat-row">
+      <div class="stat">6</div>
+      <div class="stat-label">nights a week, kitchen's on</div>
+    </div>
+    <div class="stat-row">
+      <div class="stat">25min</div>
+      <div class="stat-label">average delivery window</div>
+    </div>
+    <div class="stat-row">
+      <div class="stat">2.5am</div>
+      <div class="stat-label">last order taken</div>
+    </div>
+  </div>
+</section>
+
+<section id="menu">
+  <div class="section-head">
+    <div>
+      <h2>Tonight's menu</h2>
+      <p>Kitchen closes when the pot runs dry — order early for the fuller selection.</p>
+    </div>
+  </div>
+  <div class="menu-tabs">
+    <button class="menu-tab active" data-cat="all">All</button>
+    <button class="menu-tab" data-cat="mains">Mains</button>
+    <button class="menu-tab" data-cat="pasta">Pasta</button>
+    <button class="menu-tab" data-cat="burgers">Burgers</button>
+    <button class="menu-tab" data-cat="sides">Sides</button>
+  </div>
+  <div class="menu-list" id="menu-list"></div>
+</section>
+
+<section class="info-grid" id="delivery">
+  <div class="info-card">
+    <h3>Delivery hours</h3>
+    <p>Nightly, 9:00pm to 3:00am. Orders after 2:30am are held for the next opening.</p>
+  </div>
+  <div class="info-card">
+    <h3>Coverage</h3>
+    <p>Central and west zones tonight. Enter your address at checkout to confirm your area.</p>
+  </div>
+  <div class="info-card">
+    <h3>Payment</h3>
+    <p>Card on file or pay the rider on arrival. No minimum order for delivery.</p>
+  </div>
+</section>
+
+<footer>
+  <div>Late Kitchen — supper delivery, nightly.</div>
+  <div>hello@latekitchen.example · Open 9pm–3am</div>
+</footer>
+
+<div class="cart-overlay" id="cart-overlay"></div>
+<aside class="cart-drawer" id="cart-drawer" aria-label="Cart">
+  <div class="cart-drawer-head">
+    <h3>Your order</h3>
+    <button class="close-cart" id="close-cart" aria-label="Close cart">&times;</button>
+  </div>
+  <div class="cart-items" id="cart-items">
+    <p class="cart-empty">Nothing in your order yet.</p>
+  </div>
+  <div class="cart-total">
+    <span>Total</span>
+    <span id="cart-total">$0.00</span>
+  </div>
+  <a href="#" class="btn btn-primary" style="text-align:center; margin-top:1rem;">Checkout</a>
+</aside>
+
+<script>
+  const MENU = [
+    { id: 1, cat: 'mains', name: 'Spring Chicken', desc: 'Chicken that is spring', price: 9.50 },
+    { id: 2, cat: 'mains', name: 'Half Spring Chicken', desc: 'Half of that chicken above', price: 5.50},
+    { id: 3, cat: 'mains', name: 'Lucky Plate', desc: 'Two piece chicken', price: 4.80},
+    { id: 4, cat: 'pasta', name: 'Bolognese', desc: 'noodles', price: 5.50 },
+    { id: 5, cat: 'pasta', name: 'Mushroom Pasta', desc: 'mushroom', price: 5.50 },
+    { id: 6, cat: 'burgers', name: 'Fish/Chicken Burger', desc: 'up to u', price: 2.80 },
+    { id: 7, cat: 'burgers', name: 'Beef Burger', desc: 'beef', price: 3.00 },
+    { id: 8, cat: 'sides', name: 'french fries', desc: 'fries', price: 2.50 },
+    { id: 9, cat: 'sides', name: 'Sotong balls', desc: 'balls', price: 2.00 },
+  ];
+
+  const cart = {};
+
+  function renderMenu(filter = 'all') {
+    const list = document.getElementById('menu-list');
+    list.innerHTML = '';
+    MENU.filter(item => filter === 'all' || item.cat === filter).forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'menu-item';
+      row.innerHTML = `
+        <span class="menu-item-name">${item.name}</span>
+        <span></span>
+        <span class="menu-item-price">$${item.price.toFixed(2)}</span>
+        <button class="add-btn" data-id="${item.id}" aria-label="Add ${item.name}">+</button>
+        <span class="menu-item-desc">${item.desc}</span>
+      `;
+      list.appendChild(row);
+    });
+  }
+
+  document.querySelectorAll('.menu-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.menu-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      renderMenu(tab.dataset.cat);
+    });
+  });
+
+  function updateCartUI() {
+    const itemsEl = document.getElementById('cart-items');
+    const countEl = document.getElementById('cart-count');
+    const totalEl = document.getElementById('cart-total');
+    const entries = Object.values(cart);
+
+    if (entries.length === 0) {
+      itemsEl.innerHTML = '<p class="cart-empty">Nothing in your order yet.</p>';
+    } else {
+      itemsEl.innerHTML = entries.map(e => `
+        <div class="cart-line">
+          <div class="cart-line-name">${e.name}<small>x${e.qty}</small></div>
+          <span>$${(e.price * e.qty).toFixed(2)}</span>
+        </div>
+      `).join('');
+    }
+
+    const count = entries.reduce((sum, e) => sum + e.qty, 0);
+    const total = entries.reduce((sum, e) => sum + e.qty * e.price, 0);
+    countEl.textContent = count;
+    totalEl.textContent = `$${total.toFixed(2)}`;
+  }
+
+  document.getElementById('menu-list').addEventListener('click', e => {
+    const btn = e.target.closest('.add-btn');
+    if (!btn) return;
+    const item = MENU.find(m => m.id === Number(btn.dataset.id));
+    if (!cart[item.id]) cart[item.id] = { ...item, qty: 0 };
+    cart[item.id].qty += 1;
+    updateCartUI();
+  });
+
+  const drawer = document.getElementById('cart-drawer');
+  const overlay = document.getElementById('cart-overlay');
+  document.getElementById('open-cart').addEventListener('click', () => {
+    drawer.classList.add('open');
+    overlay.classList.add('open');
+  });
+  function closeCart() {
+    drawer.classList.remove('open');
+    overlay.classList.remove('open');
+  }
+  document.getElementById('close-cart').addEventListener('click', closeCart);
+  overlay.addEventListener('click', closeCart);
+
+  renderMenu();
+</script>
+
+</body>
+</html>
