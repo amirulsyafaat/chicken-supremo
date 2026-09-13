@@ -30,11 +30,13 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # Fill in your MySQL credentials here
 # =========================================================
 DB_CONFIG = {
-    "host": "127.0.0.1",
-    "user": "root",
-    "password": "root",
-    "database": "chicken_supremo_db"
+    "host": os.getenv("DB_HOST", "127.0.0.1"),
+    "user": os.getenv("DB_USER", "root"),
+    "password": os.getenv("DB_PASSWORD", "root"),
+    "database": os.getenv("DB_NAME", "chicken_supremo_db"),
+    "port": int(os.getenv("DB_PORT", "3306"))
 }
+
 
 
 def get_connection():
@@ -498,4 +500,5 @@ def reset_orders():
 
 if __name__ == '__main__':
     ensure_order_columns()
-    app.run(host='127.0.0.1', port=5000, debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
