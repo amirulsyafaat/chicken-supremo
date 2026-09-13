@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chicken Supremo — Kitchen & Orders Display</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #1a1a1a; color: #fff; margin: 0; padding: 20px; }
+  header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ffd400; padding-bottom: 10px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+  h1 { color: #ffd400; margin: 0; font-size: 1.5rem; }
+  .btn-group { display: flex; gap: 8px; }
+  .refresh-btn { background: #1c7a3e; color: #fff; border: none; padding: 10px 18px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
+  .refresh-btn:hover { background: #155d2f; }
+  .reset-btn { background: #d2251c; color: #fff; border: none; padding: 10px 18px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
+  .reset-btn:hover { background: #a81c15; }
+
+  .order-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+  .order-card { background: #2a2a2a; border-radius: 10px; padding: 16px; border: 1px solid #444; position: relative; }
+  .order-card.pending { border-left: 6px solid #f39c12; }
+  .order-card.verified { border-left: 6px solid #2ecc71; }
+
+  .order-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 1.1rem; color: #ffd400; }
+  .order-time { font-size: 0.8rem; color: #aaa; }
+
+  .customer-info { margin-top: 10px; font-size: 0.9rem; color: #ddd; border-bottom: 1px solid #333; padding-bottom: 8px; }
+  .customer-info div { margin-bottom: 4px; }
+
+  .pay-box { background: #333; padding: 8px 10px; border-radius: 6px; margin: 10px 0; font-size: 0.85rem; }
+  .txn-ref { color: #f39c12; font-weight: bold; word-break: break-all; }
+
+  .items-list { font-size: 0.9rem; margin-top: 8px; }
+  .item-line { display: flex; justify-content: space-between; padding: 2px 0; }
+
+  .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; margin-top: 8px; }
+  .status-badge.pending { background: rgba(243, 156, 18, 0.2); color: #f39c12; border: 1px solid #f39c12; }
+  .status-badge.verified { background: rgba(46, 204, 113, 0.2); color: #2ecc71; border: 1px solid #2ecc71; }
+
+  .action-btn { width: 100%; margin-top: 12px; background: #2ecc71; color: #000; font-weight: bold; border: none; padding: 10px; border-radius: 6px; cursor: pointer; }
+  .action-btn:hover { background: #27ae60; color: #fff; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Chicken Supremo — Orders Dashboard</h1>
+  <div class="btn-group">
+    <button class="refresh-btn" onclick="fetchOrders()">🔄 Refresh Orders</button>
+    <button class="reset-btn" onclick="resetAllOrders()">🗑 Reset All Orders</button>
+  </div>
+</header>
+
+<div class="order-grid" id="orders-grid">
+  <p style="color: #aaa;">Loading incoming orders...</p>
+</div>
+
+<script>
+  async function fetchOrders() {
+    const grid = document.getElementById('orders-grid');
+    if (!grid) return;
+
+    try {
+      const response = await fetch('http://127.0.0.1:5000/api/admin/orders');
+      if (!response.ok) throw new Error('Server status ' + response.status);
+      
+      const orders = await response.json();
+      const activeOrders = Array.isArray(orders) 
+        ? orders.filter(o => o && o.status !== 'Completed') 
+        : [];
+
+      if (activeOrders.length === 0) {
+        grid.innerHTML = '<p style="color: #aaa;">No active orders right now.</p>';
+        return;
+      }
+
+      grid.innerHTML = activeOrders.slice().reverse().map(o => {
+        const orderId = o?.orderId ?? '----';
+        const time = o?.time ?? '';
+        const name = o?.name ?? 'N/A';
+        const phone = o?.phone ?? 'N/A';
+        const email = o?.email ?? 'N/A';
+        const hall = o?.hall ?? 'N/A';
+        const rawMethod = o?.paymentMethod ? String(o.paymentMethod) : 'card';
+        const methodDisplay = rawMethod.toUpperCase();
+        const txnRef = o?.txnRef ?? 'N/A';
+        const paymentProof = o?.paymentProof ?? '';
+        const statusStr = o?.status ?? 'Pending';
+        const items = Array.isArray(o?.items) ? o.items : [];
+
+        const isVerified = statusStr.includes('Verified') || statusStr.includes('Card') || statusStr.includes('Cash');
+        const isPayNow = rawMethod.toLowerCase() === 'paynow';
+
+        return `
+          <div class="order-card ${isVerified ? 'verified' : 'pending'}">
+            <div class="order-header">
+              <span>Order #${orderId}</span>
+              <span class="order-time">${time}</span>
+            </div>
+
+            <div class="customer-info">
+              <div><strong>Name:</strong> ${name}</div>
+              <div><strong>Phone:</strong> <a href="tel:${phone}" style="color:#ffd400">${phone}</a></div>
+              <div><strong>Email:</strong> ${email}</div>
+              <div><strong>Delivery:</strong> ${hall}</div>
+            </div>
+
+            <div class="pay-box">
+              <div><strong>Method:</strong> ${methodDisplay}</div>
+              ${isPayNow ? `<div><strong>Bank Txn Ref:</strong> <span class="txn-ref">${txnRef}</span></div>` : ''}
+              ${isPayNow && paymentProof ? `<div style="margin-top:8px"><a href="http://127.0.0.1:5000${paymentProof}" target="_blank" style="color:#ffd400">View uploaded payment screenshot ↗</a></div>` : ''}
+            </div>
+
+            <div class="items-list">
+              <strong>Items Ordered:</strong>
+              ${items.map(i => `
+                <div class="item-line">
+                  <span>${i?.name || `Item ID #${i?.id}`} (x${i?.qty ?? 1})</span>
+                  <span>$${((i?.price ?? 0) * (i?.qty ?? 1)).toFixed(2)}</span>
+                </div>
+              `).join('')}
+            </div>
+
+            <div>
+              <span class="status-badge ${isVerified ? 'verified' : 'pending'}">${statusStr}</span>
+            </div>
+
+            ${!isVerified ? `
+              <button class="action-btn" onclick="verifyOrder(${orderId})">✔ Confirm Payment</button>
+            ` : `
+              <button class="action-btn" style="background:#e74c3c; color:#fff;" onclick="completeOrder(${orderId})">📦 Complete & Clear Order</button>
+            `}
+          </div>
+        `;
+      }).join('');
+
+    } catch (err) {
+      console.error('Error fetching orders:', err);
+      grid.innerHTML = '<p style="color: #e74c3c;">⚠️ Server connection error. Ensure python app.py is running on port 5000.</p>';
+    }
+  }
+
+  async function verifyOrder(orderId) {
+    try {
+      const res = await fetch(`http://127.0.0.1:5000/api/admin/orders/${orderId}/verify`, { method: 'POST' });
+      const result = await res.json();
+      if (result.success) fetchOrders();
+    } catch (err) { alert('Failed to verify order.'); }
+  }
+
+  async function completeOrder(orderId) {
+    try {
+      const res = await fetch(`http://127.0.0.1:5000/api/admin/orders/${orderId}/complete`, { method: 'POST' });
+      const result = await res.json();
+      if (result.success) fetchOrders();
+    } catch (err) { alert('Failed to complete order.'); }
+  }
+
+  async function resetAllOrders() {
+    if (confirm('Are you sure you want to clear ALL orders?')) {
+      try {
+        const res = await fetch('http://127.0.0.1:5000/api/admin/orders/reset', { method: 'POST' });
+        const result = await res.json();
+        if (result.success) fetchOrders();
+      } catch (err) { alert('Failed to reset orders.'); }
+    }
+  }
+
+  setInterval(fetchOrders, 5000);
+  fetchOrders();
+</script>
+
+</body>
+</html>
