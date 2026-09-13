@@ -496,6 +496,9 @@ def reset_orders():
     cursor.close()
     conn.close()
     return jsonify({"success": True, "message": "All orders have been reset!"}), 200
+@app.route('/')
+def home():
+    return "Chicken Supremo API is up and running!"
 
 
 if __name__ == '__main__':
