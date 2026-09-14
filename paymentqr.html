@@ -44,7 +44,7 @@
   <a class="back" href="chicken-supremo-ntu.html">← Back to menu</a>
 </main>
 <script>
-  const API = 'http://127.0.0.1:5000';
+  const API = 'https://chicken-supremo-2.onrender.com';
   let order;
   try { order = JSON.parse(sessionStorage.getItem('pendingOrder')); } catch (_) { order = null; }
   if (!order || !Array.isArray(order.items) || !order.items.length) {
