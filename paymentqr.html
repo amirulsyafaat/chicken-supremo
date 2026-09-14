@@ -44,6 +44,7 @@
   <a class="back" href="chicken-supremo-ntu.html">← Back to menu</a>
 </main>
 <script>
+<script>
   const API = 'https://chicken-supremo-2.onrender.com';
   let order;
   try { order = JSON.parse(sessionStorage.getItem('pendingOrder')); } catch (_) { order = null; }
@@ -58,7 +59,15 @@
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items: order.items })
       });
-      const result = await response.json();
+      
+      const rawText = await response.text();
+      let result;
+      try {
+        result = JSON.parse(rawText);
+      } catch (e) {
+        throw new Error('Server returned an invalid response while fetching the QR code.');
+      }
+
       if (!response.ok || !result.success) throw new Error(result.error || 'Could not generate the QR code.');
       document.getElementById('total').textContent = `$${Number(result.amount).toFixed(2)}`;
       document.getElementById('recipient').textContent = `PayNow to ${result.recipient} · ${result.mobile}`;
@@ -82,7 +91,15 @@
     form.append('paymentProof', proof);
     try {
       const response = await fetch(`${API}/api/orders/paynow`, { method: 'POST', body: form });
-      const result = await response.json();
+      
+      const rawText = await response.text();
+      let result;
+      try {
+        result = JSON.parse(rawText);
+      } catch (e) {
+        throw new Error(`Server Error (${response.status}): The server returned an error page instead of confirming your order.`);
+      }
+
       if (!response.ok || !result.success) throw new Error(result.error || 'Could not submit your order.');
       sessionStorage.removeItem('pendingOrder');
       document.querySelector('main').innerHTML = `<h1>Order submitted</h1><p class="total">Order #${result.orderId}</p><p class="note">Your payment screenshot has been sent for manual verification. Your order is <strong>pending</strong>.</p><p class="note">${result.emailSent ? 'A pending-order receipt has been emailed to you.' : 'Your order was recorded. The shop still needs to configure email delivery.'}</p><a class="back" href="chicken-supremo-ntu.html">Return to menu</a>`;
@@ -92,5 +109,6 @@
     }
   });
 </script>
+
 </body>
 </html>
