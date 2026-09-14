@@ -500,7 +500,7 @@
 
   async function loadMenuFromDatabase() {
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/menu');
+      const response = await fetch('https://chicken-supremo-2.onrender.com/api/menu');
       if (!response.ok) throw new Error('Network response was not ok');
 
       MENU = await response.json();
@@ -520,7 +520,7 @@
 
   async function loadStoreStatus() {
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/store-status');
+      const response = await fetch('https://chicken-supremo-2.onrender.com/api/store-status');
       if (!response.ok) throw new Error('Network response was not ok');
       storeStatus = await response.json();
     } catch (error) {
@@ -662,7 +662,7 @@
 
   async function submitOrderToBackend(payload) {
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/orders', {
+      const response = await fetch('https://chicken-supremo-2.onrender.com/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
