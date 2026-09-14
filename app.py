@@ -13,6 +13,12 @@ from werkzeug.utils import secure_filename
 from zoneinfo import ZoneInfo
 import qrcode
 
+import os
+
+UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads', 'payment-proofs')
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+
 app = Flask(__name__)
 CORS(app)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
